@@ -40,3 +40,4 @@ if __name__ == "__main__":
     app.search_vector_by_text(
         "oye levantame el docker compose, solo la app de genai", top_k=3
     )
+    app.search_vector_by_vector()
