@@ -1,5 +1,5 @@
 .env
-.poetry.lock
+poetry.lock
 **/__pycache__/**
 .venv/
 .vscode/
