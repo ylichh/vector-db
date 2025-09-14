@@ -1,7 +1,11 @@
 import os
-from .i_processor import IDocumentProcessor
-from .schemas import CommandChunkData
+
 from markdown_it import MarkdownIt
+
+from ...domain.services.document_processor.i_processor import (
+    IDocumentProcessor,
+)
+from ...domain.services.document_processor.schemas import CommandChunkData
 
 
 class MarkdownCommandProcessor(IDocumentProcessor):
