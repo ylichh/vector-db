@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from pinecone import Pinecone, ServerlessSpec
-from .schemas import VectorMatches
+from ...domain.repositories.vector_db.i_vector_db import IVectorDBManager
+from ...domain.repositories.vector_db.schemas import VectorMatches
 
 load_dotenv()
 
@@ -16,13 +17,17 @@ class IndexConfiguration:
         self.api_key = api_key
 
 
-class PineconeManager:
+class PineconeManager(IVectorDBManager):
     def __init__(self, index_configuration: IndexConfiguration):
 
         self.index_name = index_configuration.name
         self.index_dimension = index_configuration.dimension
         self.api_key = index_configuration.api_key
-        self.pc = Pinecone(api_key=self.api_key)
+        try:
+            self.pc = Pinecone(api_key=self.api_key)
+            self.create_if_not_exists_index()
+        except Exception as e:
+            print(f"Error initializing PineconeManager: {e}")
 
     def create_if_not_exists_index(self):
         try:
@@ -45,9 +50,9 @@ class PineconeManager:
             print(f"Error al crear o conectar con el índice: {e}")
             raise
 
-    def upload_vectors(self, vector_data):
+    def upload_vector(self, vector_data):
         """
-        Sube una lista de vectores a Pinecone.
+        Sube un vector a Pinecone.
         Cada vector debe ser una tupla (id, vector, metadata).
         """
         pinecone_document = {
@@ -81,8 +86,11 @@ class PineconeManager:
 
 if __name__ == "__main__":
     import os
-    from document_processors.markdown import MarkdownCommandProcessor
-    from embedders.openai import OpenAIEmbedder, OpenAIConfiguration
+    from src.infrastructure.adapters.markdown import MarkdownCommandProcessor
+    from src.infrastructure.external_services.openai_embedder import (
+        OpenAIEmbedder,
+        OpenAIConfiguration,
+    )
 
     load_dotenv()
     current_dir = os.path.dirname(os.path.abspath(__file__))

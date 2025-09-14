@@ -3,6 +3,6 @@ from abc import ABC, abstractmethod
 
 class IEmbedder(ABC):
     @abstractmethod
-    def generate_embedding(self, text: str):
+    def generate_embedding(self, text: str) -> list[float]:
         """Genera el embedding para el texto dado."""
         pass

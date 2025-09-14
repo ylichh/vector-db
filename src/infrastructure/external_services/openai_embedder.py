@@ -1,6 +1,6 @@
 from openai import OpenAI
 
-from .i_embedder import IEmbedder
+from ...domain.services.embedder.i_embedder import IEmbedder
 
 
 class OpenAIConfiguration:

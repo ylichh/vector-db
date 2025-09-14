@@ -2,13 +2,16 @@ from dotenv import load_dotenv
 import os
 
 
-from use_cases.app import App
-from pinecone_manager.pinecone import (
+from src.application.app import App
+from src.infrastructure.external_services.openai_embedder import (
+    OpenAIEmbedder,
+    OpenAIConfiguration,
+)
+from src.infrastructure.adapters.markdown import MarkdownCommandProcessor
+from src.infrastructure.persistance.pinecone import (
     PineconeManager,
     IndexConfiguration,
 )
-from embedders.openai import OpenAIEmbedder, OpenAIConfiguration
-from document_processors.markdown import MarkdownCommandProcessor
 
 
 if __name__ == "__main__":
@@ -27,7 +30,7 @@ if __name__ == "__main__":
     )
 
     app = App(
-        pinecone_manager=pinecone_manager,
+        vector_db_manager=pinecone_manager,
         embedder=OpenAIEmbedder(
             config=OpenAIConfiguration(
                 api_key=os.getenv("OPENAI_API_KEY"),
@@ -36,8 +39,9 @@ if __name__ == "__main__":
         ),
         document_processor=MarkdownCommandProcessor(document_path=file_path),
     )
-
-    app.search_vector_by_text(
+    # app.upload_vectors()
+    result = app.search_vector_by_text(
         "oye levantame el docker compose, solo la app de genai", top_k=3
     )
-    app.search_vector_by_vector()
+
+    print(result)

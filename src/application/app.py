@@ -1,26 +1,26 @@
 import os
 from dotenv import load_dotenv
 import uuid
-from pinecone_manager.pinecone import (
-    PineconeManager,
-    IndexConfiguration,
+
+from ..domain.repositories.vector_db.i_vector_db import IVectorDBManager
+from ..domain.services.embedder.i_embedder import IEmbedder
+from ..domain.services.document_processor.i_processor import (
+    IDocumentProcessor,
 )
-from embedders.openai import IEmbedder
-from document_processors.markdown import MarkdownCommandProcessor
 
 
 class App:
     def __init__(
         self,
-        pinecone_manager=PineconeManager,
+        vector_db_manager=IVectorDBManager,
         embedder=IEmbedder,
-        document_processor=MarkdownCommandProcessor,
+        document_processor=IDocumentProcessor,
     ):
-        self.pinecone_manager = pinecone_manager
+        self.pinecone_manager = vector_db_manager
         self.embedder = embedder
         self.document_processor = document_processor
 
-    def upload_vector(self):
+    def upload_vectors(self):
         try:
             self.pinecone_manager.create_if_not_exists_index()
             document_chunk_generator = (
@@ -41,7 +41,7 @@ class App:
                     "values": vector,
                     "metadata": metadata,
                 }
-                self.pinecone_manager.upload_vectors(pinecone_document)
+                self.pinecone_manager.upload_vector(pinecone_document)
             except StopIteration:
                 print("All document chunks have been processed.")
                 break
@@ -72,8 +72,15 @@ class App:
 
 if __name__ == "__main__":
 
-    from document_processors.markdown import MarkdownCommandProcessor
-    from embedders.openai import OpenAIEmbedder, OpenAIConfiguration
+    from src.infrastructure.external_services.openai_embedder import (
+        OpenAIEmbedder,
+        OpenAIConfiguration,
+    )
+    from src.infrastructure.adapters.markdown import MarkdownCommandProcessor
+    from src.infrastructure.persistance.pinecone import (
+        PineconeManager,
+        IndexConfiguration,
+    )
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(current_dir, "./documents/markdown/commands.md")
@@ -88,7 +95,7 @@ if __name__ == "__main__":
     )
 
     app = App(
-        pinecone_manager=pinecone_manager,
+        vector_db_manager=pinecone_manager,
         embedder=OpenAIEmbedder(
             config=OpenAIConfiguration(
                 api_key=os.getenv("OPENAI_API_KEY"),
@@ -98,4 +105,4 @@ if __name__ == "__main__":
         document_processor=MarkdownCommandProcessor(document_path=file_path),
     )
 
-    app.upload_vector()
+    app.upload_vectors()
