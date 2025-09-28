@@ -15,10 +15,9 @@ from src.infrastructure.persistance.pinecone import (
 
 
 if __name__ == "__main__":
-    file_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        "./documents/markdown/commands.md",
-    )
+
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_dir, "./documents/markdown/commands.md")
     load_dotenv()
 
     pinecone_manager = PineconeManager(
@@ -39,9 +38,5 @@ if __name__ == "__main__":
         ),
         document_processor=MarkdownCommandProcessor(document_path=file_path),
     )
-    # app.upload_vectors()
-    result = app.search_vector_by_text(
-        "oye levantame el docker compose, solo la app de genai", top_k=3
-    )
 
-    print(result)
+    app.upload_vectors()
